@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>0511小兽猩身份验证系统</title>
+  <style>
+    body {
+      font-family: "Helvetica", sans-serif;
+      background-color: #0d0d2b;
+      color: #f2f2f2;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-size: 1.6em;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+    .bubble {
+      padding: 12px 16px;
+      margin: 10px;
+      border-radius: 16px;
+      display: inline-block;
+      max-width: 80%;
+    }
+    .left {
+      background-color: #2c2c3c;
+    }
+    .right {
+      background-color: #6a5acd;
+      text-align: right;
+    }
+    .chat-box {
+      display: flex;
+      flex-direction: column;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #8a2be2;
+      border: none;
+      color: white;
+      font-size: 1em;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px 5px 0 0;
+    }
+    .button-group button {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container active" id="startScreen">
+    <h2>👿 0511小兽猩身份验证系统</h2>
+    <p>这是一个五题的赵芯身份验证系统，回答正确会获得答案解析，<br>
+    回答错误会获得绝望拉子爱直女伤痛文学一句。<br>
+    五题全部回答正确者拟制为赵芯，可向cyx兑换生日礼物。</p>
+    <button onclick="startGame()">👿 开始验证</button>
+  </div>
+
+  <div class="container" id="questionScreen">
+    <div class="chat-box" id="questionText"></div>
+    <div class="button-group" id="options"></div>
+  </div>
+
+  <div class="container" id="answerScreen">
+    <div class="chat-box" id="answerText"></div>
+    <button onclick="nextQuestion()">继续挑战</button>
+  </div>
+
+  <div class="container" id="resultScreen">
+    <div class="chat-box" id="resultText"></div>
+    <button onclick="restartGame()">再试一次</button>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        text: "偷偷戴头纱的赵芯自我认同为以下哪项？",
+        options: ["直女", "drag queen", "女同", "人妻"],
+        answer: "人妻",
+        success: "✅ 结婚了",
+        fail: "❌ 直男对女同：兄弟，你怎么了到底？我发现自从我跟你女朋友在一起你好像就很少笑了"
+      },
+      {
+        text: "赵芯的电竞基地是以下哪里？",
+        options: ["厕所", "图书馆", "网吧", "衣柜"],
+        answer: "图书馆",
+        success: "✅ 无聊得我学会了两个新游戏角色那很有学习效率了图书馆成我电竞基地了我觉得我几天之内都不想玩第五了游戏都打烦了19岁最后几天就这样",
+        fail: "❌ 女同的日推：环游的行星怎么可以拥有你"
+      },
+      {
+        text: "赵芯的种族是？",
+        options: ["Asian baby girl", "日本人", "小白兔", "人妻"],
+        answer: "小白兔",
+        success: "✅ 自己选的这个？那很乖了",
+        fail: "❌ 某女同愚人节跟某直女说爱她之后人家根本没回复"
+      },
+      {
+        text: "五一假期全用来？",
+        options: ["看康德了", "看黑格尔了", "住骨灰房了", "续抖音火花了"],
+        answer: "续抖音火花了",
+        success: "✅ 后来又回去看了眼那个爱心锁真挺丑的！",
+        fail: "❌ 回寝室的路上看到异性恋情侣散步有点羡慕，但是一想到他们多半没有一生锁爱这回事，我那颗嫉妒又自卑的心就释然了。"
+      },
+      {
+        text: "赵芯在以下哪个装扮中最美丽？",
+        options: ["小短裙", "皮衣", "写真（还没发）", "福瑞"],
+        answer: "写真（还没发）",
+        success: "✅ 你知道为啥还不发？人妻？",
+        fail: "❌ 并没有明确话语划定的关系，种种不明不白，用朋友便可说清（转自红薯拉子）"
+      }
+    ];
+
+    let current = 0;
+    let correctCount = 0;
+
+    function switchScreen(screenId) {
+      document.querySelectorAll('.container').forEach(div => div.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    function startGame() {
+      current = 0;
+      correctCount = 0;
+      switchScreen('questionScreen');
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const q = questions[current];
+      document.getElementById('questionText').innerHTML = `<div class='bubble left'>👿：${q.text}</div>`;
+      document.getElementById('options').innerHTML = q.options.map(opt => {
+        return `<button onclick="submitAnswer('${opt}')">${opt}</button>`;
+      }).join('');
+    }
+
+    function submitAnswer(selected) {
+      const q = questions[current];
+      const text = document.getElementById('answerText');
+      text.innerHTML = `<div class='bubble right'>你：${selected}</div>`;
+      if (selected === q.answer) {
+        correctCount++;
+        text.innerHTML += `<div class='bubble left'>👿：${q.success}</div>`;
+      } else {
+        text.innerHTML += `<div class='bubble left'>👿：${q.fail}</div>`;
+      }
+      switchScreen('answerScreen');
+    }
+
+    function nextQuestion() {
+      current++;
+      if (current < questions.length) {
+        switchScreen('questionScreen');
+        loadQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      let result = '';
+      if (correctCount === questions.length) {
+        result = `<div class='bubble left'>👑 赵芯验证成功，出生，截图兑换 cyx 请客舞会门票一张 🎟️</div>`;
+      } else {
+        result = `<div class='bubble left'>💀 验证失败</div>`;
+      }
+      document.getElementById('resultText').innerHTML = result;
+      switchScreen('resultScreen');
+    }
+
+    function restartGame() {
+      switchScreen('startScreen');
+    }
+  </script>
+</body>
+</html>
